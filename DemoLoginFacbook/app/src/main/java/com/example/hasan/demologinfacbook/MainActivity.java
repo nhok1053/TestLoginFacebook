@@ -27,6 +27,7 @@ import com.facebook.login.widget.LoginButton;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     private LoginButton loginButton;
@@ -72,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
         loginButton = (LoginButton) findViewById(R.id.login_button);
         img = (ImageView) findViewById(R.id.imageView);
         tv = (TextView) findViewById(R.id.textView);
-        loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setReadPermissions(Arrays.asList(
+                "public_profile", "email", "user_birthday", "user_friends"));
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -85,22 +87,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
                 accessTokenTracker.startTracking();
+
                 ProfileTracker profileTracker = new ProfileTracker() {
                     @Override
                     protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
 
+                        if(currentProfile!=null){
+                            tv.setText(currentProfile.getFirstName() + " " + currentProfile.getLastName());
+                            String url = currentProfile.getProfilePictureUri(200, 200).toString();
+                            DowloadImage dowloadImage = new DowloadImage();
+                            dowloadImage.execute(img, url);}
+                        Log.e("facebook name:", currentProfile.getProfilePictureUri(500, 500).toString());
+                        Toast.makeText(MainActivity.this, "Successful", Toast.LENGTH_LONG).show();
                     }
                 };
 
                 profileTracker.startTracking();
-                Profile profile = Profile.getCurrentProfile();
-                if(profile!=null){
-                tv.setText(profile.getFirstName() + " " + profile.getLastName());
-                String url = profile.getProfilePictureUri(200, 200).toString();
-                DowloadImage dowloadImage = new DowloadImage();
-                dowloadImage.execute(img, url);}
-                Log.e("facebook name:", profile.getProfilePictureUri(500, 500).toString());
-                Toast.makeText(MainActivity.this, "Successful", Toast.LENGTH_LONG).show();
+
+
             }
 
             @Override
